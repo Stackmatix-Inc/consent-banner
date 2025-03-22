@@ -1,19 +1,62 @@
 // src/index.js
 (function () {
   const CONFIG = window.__ConsentBannerConfig || {
-    theme: "dark", // or 'light'
-    layout: "footer", // or 'modal', 'header', etc.
+    theme: "dark",
+    layout: "footer",
     privacyPolicyUrl: "/privacy-policy",
+    language: "en"
   };
 
   const CONSENT_COOKIE_KEY = "cookie_consent_level";
   const DATA_LAYER = window.dataLayer = window.dataLayer || [];
 
-  // Placeholder: Determine user's region and apply default consents
-  function getDefaultConsentByRegion() {
-    // TODO: Replace with real geo lookup (e.g. via IPinfo, Cloudflare, etc.)
-    const region = "EEA"; // fallback default for now
-    if (region === "EEA" || region === "UK" || region === "CH") {
+  const I18N = {
+    en: {
+      description: "🍪 We use cookies to improve your experience.",
+      privacyPolicy: "Privacy Policy",
+      acceptAll: "Accept All",
+      denyAll: "Deny All",
+      customize: "Customize",
+      preferences: "Preferences",
+      necessary: "Necessary (always on)",
+      functionality: "Functional",
+      tracking: "Analytics",
+      targeting: "Targeting",
+      save: "Save Preferences"
+    },
+    // Add more languages here
+    fr: {
+      description: "🍪 Nous utilisons des cookies pour améliorer votre expérience.",
+      privacyPolicy: "Politique de Confidentialité",
+      acceptAll: "Tout accepter",
+      denyAll: "Tout refuser",
+      customize: "Personnaliser",
+      preferences: "Préférences",
+      necessary: "Nécessaire (toujours activé)",
+      functionality: "Fonctionnels",
+      tracking: "Analytiques",
+      targeting: "Ciblage",
+      save: "Sauvegarder les préférences"
+    }
+  };
+
+  function t(key) {
+    const lang = CONFIG.language in I18N ? CONFIG.language : "en";
+    return I18N[lang][key] || key;
+  }
+
+  async function fetchRegion() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      return data.country || "US";
+    } catch (e) {
+      return "US";
+    }
+  }
+
+  function getDefaultConsentByRegion(region) {
+    if (["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","UK","CH"].includes(region)) {
       return { functionality: false, tracking: false, targeting: false };
     } else if (region === "US") {
       return { functionality: true, tracking: false, targeting: false };
@@ -42,24 +85,23 @@
     banner.id = "consent-banner";
     banner.innerHTML = `
       <div class="cb-wrapper ${CONFIG.theme} ${CONFIG.layout}">
-        <p>🍪 We use cookies to improve your experience. <a href="${CONFIG.privacyPolicyUrl}" target="_blank">Privacy Policy</a></p>
+        <p>${t("description")} <a href="${CONFIG.privacyPolicyUrl}" target="_blank">${t("privacyPolicy")}</a></p>
         <div class="cb-actions">
-          <button id="cb-accept">Accept All</button>
-          <button id="cb-deny">Deny All</button>
-          <button id="cb-customize">Customize</button>
+          <button id="cb-accept">${t("acceptAll")}</button>
+          <button id="cb-deny">${t("denyAll")}</button>
+          <button id="cb-customize">${t("customize")}</button>
         </div>
       </div>
       <div id="cb-preferences" style="display:none">
-        <h3>Preferences</h3>
-        <label><input type="checkbox" disabled checked> Necessary (always on)</label>
-        <label><input type="checkbox" id="cb-func"> Functional</label>
-        <label><input type="checkbox" id="cb-track"> Analytics</label>
-        <label><input type="checkbox" id="cb-target"> Targeting</label>
-        <button id="cb-save">Save Preferences</button>
+        <h3>${t("preferences")}</h3>
+        <label><input type="checkbox" disabled checked> ${t("necessary")}</label>
+        <label><input type="checkbox" id="cb-func"> ${t("functionality")}</label>
+        <label><input type="checkbox" id="cb-track"> ${t("tracking")}</label>
+        <label><input type="checkbox" id="cb-target"> ${t("targeting")}</label>
+        <button id="cb-save">${t("save")}</button>
       </div>
     `;
     document.body.appendChild(banner);
-
     attachHandlers();
   }
 
@@ -89,10 +131,11 @@
     };
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     let stored = getStoredConsent();
     if (!stored) {
-      const defaults = getDefaultConsentByRegion();
+      const region = await fetchRegion();
+      const defaults = getDefaultConsentByRegion(region);
       setConsent(defaults, "consent_default");
       injectBanner();
     }
