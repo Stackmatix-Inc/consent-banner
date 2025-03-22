@@ -1,11 +1,18 @@
 // src/index.js
 (function () {
-  const CONFIG = window.__ConsentBannerConfig || {
+  const DEFAULT_CONFIG = {
     theme: "dark",
     layout: "footer",
     privacyPolicyUrl: "/privacy-policy",
     language: "en"
   };
+
+  function getConfig() {
+    return Object.assign({}, DEFAULT_CONFIG, window.__ConsentBannerConfig || {});
+  }
+
+  const CONFIG = getConfig();
+  window.smcbConfig = getConfig; // For debugging in console
 
   const CONSENT_COOKIE_KEY = "cookie_consent_level";
   const DATA_LAYER = window.dataLayer = window.dataLayer || [];
@@ -24,7 +31,6 @@
       targeting: "Targeting",
       save: "Save Preferences"
     },
-    // Add more languages here
     fr: {
       description: "🍪 Nous utilisons des cookies pour améliorer votre expérience.",
       privacyPolicy: "Politique de Confidentialité",

@@ -7,5 +7,5 @@ git commit -m "test: update banner logic"
 git push origin test-banner
 
 # Re-tag the latest commit
-git tag -f v0.0.2-test
-git push origin -f v0.0.2-test
+git tag -f v0.0.3-test
+git push origin -f v0.0.3-test
