@@ -145,8 +145,8 @@
     };
   }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    let stored = getStoredConsent();
+  async function onReady() {
+    const stored = getStoredConsent();
     if (!stored) {
       const region = await fetchRegion();
       const defaults = getDefaultConsentByRegion(region);
@@ -155,5 +155,11 @@
     } else {
       console.log("[SMCB] Consent already stored. Banner will not show.");
     }
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", onReady);
+  } else {
+    onReady();
+  }
 })();
