@@ -9,5 +9,8 @@
   "author": "Andy C<andy@stackmatix.com>",
   "license": "GNU",
   "type": "commonjs",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "esbuild": "^0.25.1"
+  }
 }
