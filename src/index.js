@@ -8,7 +8,9 @@
   };
 
   function getConfig() {
-    return Object.assign({}, DEFAULT_CONFIG, window.__ConsentBannerConfig || {});
+    const config = Object.assign({}, DEFAULT_CONFIG, window.__ConsentBannerConfig || {});
+    console.log("[SMCB] Loaded config:", config);
+    return config;
   }
 
   const CONFIG = getConfig();
@@ -55,8 +57,6 @@
     try {
       const res = await fetch("https://ipapi.co/json/");
       const data = await res.json();
-      dataLayer.push({"region": data.country})
-      console.log({"region": data.country})
       return data.country || "US";
     } catch (e) {
       return "US";
@@ -109,6 +109,12 @@
         <button id="cb-save">${t("save")}</button>
       </div>
     `;
+
+    if (!document.body) {
+      console.warn("[SMCB] document.body not ready — banner injection skipped");
+      return;
+    }
+
     document.body.appendChild(banner);
     attachHandlers();
   }
@@ -146,6 +152,8 @@
       const defaults = getDefaultConsentByRegion(region);
       setConsent(defaults, "consent_default");
       injectBanner();
+    } else {
+      console.log("[SMCB] Consent already stored. Banner will not show.");
     }
   });
 })();
