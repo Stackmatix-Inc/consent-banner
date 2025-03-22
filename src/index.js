@@ -1,5 +1,36 @@
 // src/index.js
 (function () {
+  const REGION_TO_LANG = {
+    US: "en", GB: "en", AU: "en", CA: "en", IE: "en",
+    FR: "fr", BE: "fr", CH: "fr",
+    DE: "de", AT: "de", CH: "de",
+    ES: "es", MX: "es", AR: "es",
+    IT: "it",
+    PT: "pt", BR: "pt",
+    NL: "nl",
+    PL: "pl",
+    SE: "sv",
+    NO: "no",
+    FI: "fi",
+    DK: "da",
+    RU: "ru",
+    CN: "zh",
+    JP: "ja",
+    KR: "ko",
+    IN: "hi",
+    AE: "ar",
+    SA: "ar",
+    IL: "he",
+    ID: "id",
+    TH: "th",
+    TR: "tr",
+    VN: "vi",
+    ZA: "en",
+    NG: "en",
+    EG: "ar",
+    AQ: "en" // Antarctica
+  };
+
   const DEFAULT_CONFIG = {
     theme: "dark",
     layout: "footer",
@@ -7,14 +38,16 @@
     language: "en"
   };
 
-  function getConfig() {
-    const config = Object.assign({}, DEFAULT_CONFIG, window.__ConsentBannerConfig || {});
+  function getConfig(region) {
+    const userConfig = window.__ConsentBannerConfig || {};
+    const fallbackLang = userConfig.language || REGION_TO_LANG[region] || (navigator.language?.slice(0, 2) || "en");
+    const config = Object.assign({}, DEFAULT_CONFIG, userConfig, { language: fallbackLang });
     console.log("[SMCB] Loaded config:", config);
     return config;
   }
 
-  const CONFIG = getConfig();
-  window.smcbConfig = getConfig; // For debugging in console
+  let CONFIG; // will be assigned after fetchRegion
+  window.smcbConfig = () => CONFIG; // expose runtime config for debug
 
   const CONSENT_COOKIE_KEY = "cookie_consent_level";
   const DATA_LAYER = window.dataLayer = window.dataLayer || [];
@@ -151,11 +184,13 @@
     if (!stored) {
       const region = await fetchRegion();
       console.log("[SMCB] Region:", region);
+      CONFIG = getConfig(region);
       const defaults = getDefaultConsentByRegion(region);
       console.log("[SMCB] Defaults:", defaults);
       setConsent(defaults, "consent_default");
       injectBanner();
     } else {
+      CONFIG = getConfig(); // still load config for debugging
       console.log("[SMCB] Consent already stored. Banner will not show.");
     }
   }
