@@ -1,0 +1,13 @@
+{
+  "name": "consent-banner",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --minify --outfile=dist/consent-banner.min.js && cp src/styles.css dist/consent-banner.min.css"
+  },
+  "keywords": [],
+  "author": "Andy C<andy@stackmatix.com>",
+  "license": "GNU",
+  "type": "commonjs",
+  "description": ""
+}
