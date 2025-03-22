@@ -14,3 +14,8 @@ git push origin test-env
 # Re-tag the latest commit with incremented version
 git tag -f v0.0.$NEW_VERSION-test
 git push origin -f v0.0.$NEW_VERSION-test
+
+# Output the CDN links with new version
+echo "Use these CDN links in your HTML:"
+echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/Stackmatix-Inc/consent-banner@v0.0.$NEW_VERSION-test/dist/consent-banner.min.css\">"
+echo "<script src=\"https://cdn.jsdelivr.net/gh/Stackmatix-Inc/consent-banner@v0.0.$NEW_VERSION-test/dist/consent-banner.min.js\"></script>"

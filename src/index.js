@@ -146,10 +146,13 @@
   }
 
   async function onReady() {
+    console.log("[SMCB] onReady triggered");
     const stored = getStoredConsent();
     if (!stored) {
       const region = await fetchRegion();
+      console.log("[SMCB] Region:", region);
       const defaults = getDefaultConsentByRegion(region);
+      console.log("[SMCB] Defaults:", defaults);
       setConsent(defaults, "consent_default");
       injectBanner();
     } else {
