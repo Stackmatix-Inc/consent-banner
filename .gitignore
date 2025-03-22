@@ -1,1 +1,4 @@
 *.code-workspace
+.husky/
+node_modules/
+
