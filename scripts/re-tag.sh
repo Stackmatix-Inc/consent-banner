@@ -9,7 +9,7 @@ git add .
 git commit -m "test: update banner logic"
 
 # Push changes to branch
-git push origin test-banner
+git push origin test-env
 
 # Re-tag the latest commit with incremented version
 git tag -f v0.0.$NEW_VERSION-test
