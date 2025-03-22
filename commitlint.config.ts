@@ -23,6 +23,7 @@ const Configuration: UserConfig = {
       'db',
       'misc',
       'security',
+      'release',
       'api',
       'ckpt',
       'docs',
