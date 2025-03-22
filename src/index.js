@@ -55,6 +55,8 @@
     try {
       const res = await fetch("https://ipapi.co/json/");
       const data = await res.json();
+      dataLayer.push({"region": data.country})
+      console.log({"region": data.country})
       return data.country || "US";
     } catch (e) {
       return "US";
