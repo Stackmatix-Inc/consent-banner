@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/index.js --bundle --minify --outfile=dist/consent-banner.min.js && cp src/styles.css dist/consent-banner.min.css"
+    "build": "esbuild src/index.js --bundle --minify --outfile=dist/consent-banner.min.js && cp src/styles.css dist/consent-banner.min.css",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "Andy C<andy@stackmatix.com>",
@@ -12,5 +13,17 @@
   "description": "",
   "dependencies": {
     "esbuild": "^0.25.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/cz-commitlint": "^19.5.0",
+    "husky": "^9.1.7",
+    "typescript": "^5.8.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
   }
 }
