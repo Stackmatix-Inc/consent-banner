@@ -1247,10 +1247,26 @@
     CONFIG.region = result.region;
     
     if (!stored) {
-      // No stored consent, show banner with defaults
+      // No stored consent, get defaults for this region
       const defaults = getDefaultConsentByRegion(result.region);
       console.log("[SMCB] Defaults:", defaults);
+      
+      // Set consent in storage/cookies
       setConsent(defaults, "consent_default");
+      
+      // Additional UET update for targeting=false regions (before banner shows)
+      if (CONFIG.bingUET && defaults.targeting === false) {
+        try {
+          window.uetq = window.uetq || [];
+          window.uetq.push('consent', 'update', {
+            'ad_storage': 'denied'
+          });
+          console.log("[SMCB] Set initial Bing UET consent to denied based on region defaults");
+        } catch (e) {
+          console.error("[SMCB] Error setting initial Bing UET consent:", e);
+        }
+      }
+      
       injectBanner();
     } else {
       // Check if any consent categories are false (opted out)
