@@ -469,13 +469,7 @@
     try {
       console.log("[SMCB] Attempting to fetch region from ipapi.co...");
       
-      const res = await fetch("https://ipapi.co/json/", {
-        // Adding cache-control header for better performance
-        headers: {
-          'Cache-Control': 'max-age=3600' // Cache for 1 hour
-        }
-      });
-      
+      const res = await fetch("https://ipapi.co/json/")
       if (!res.ok) throw new Error(`ipapi.co responded with status: ${res.status}`);
       
       const data = await res.json();
