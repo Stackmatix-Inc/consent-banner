@@ -475,29 +475,35 @@
       const data = await res.json();
       console.log("[SMCB] Successfully used ipapi.co:", data.country_code);
       
+      // Store original country code for language selection
+      const countryCode = data.country_code;
+      
       // GDPR countries (EU member states + UK, Switzerland, Norway, Iceland, Liechtenstein)
       const gdprCountries = ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","GB","UK","CH"];
       
-      if (gdprCountries.includes(data.country_code)) {
-        return "GDPR";
-      }
-      
-      // US with special case for California
-      if (data.country_code === "US") {
+      let region;
+      if (gdprCountries.includes(countryCode)) {
+        region = "GDPR";
+      } else if (countryCode === "US") {
         if (data.region_code === "CA") {
-          return "CPRA";
+          region = "CPRA";
+        } else {
+          region = "US";
         }
-        return "US";
+      } else if (countryCode === "BR") {
+        region = "LGPD";
+      } else if (countryCode === "CA") {
+        region = "PIPEDA";
+      } else if (countryCode === "JP") {
+        region = "APPI";
+      } else if (countryCode === "KR") {
+        region = "PIPA";
+      } else {
+        region = "ROW";
       }
       
-      // Other specific privacy regulation regions
-      if (data.country_code === "BR") return "LGPD";
-      if (data.country_code === "CA") return "PIPEDA";
-      if (data.country_code === "JP") return "APPI";
-      if (data.country_code === "KR") return "PIPA";
-      
-      // Default to Rest of World
-      return "ROW";
+      // Return both the regulatory region and the country code
+      return { region, countryCode };
     } catch (e) {
       console.log("[SMCB] Error with ipapi.co:", e.message);
       console.log("[SMCB] Falling back to ipwho.is...");
@@ -1211,18 +1217,21 @@
     console.log("[SMCB] onReady triggered");
     const stored = getStoredConsent();
     if (!stored) {
-      const region = await fetchRegion();
-      console.log("[SMCB] Region:", region);
-      CONFIG = getConfig(region);
-      CONFIG.region = region; // Store the region in CONFIG for later use
-      const defaults = getDefaultConsentByRegion(region);
+      const result = await fetchRegion();
+      console.log("[SMCB] Region info:", result);
+      
+      // Use countryCode for language selection but region for regulatory defaults
+      CONFIG = getConfig(result.countryCode);
+      CONFIG.region = result.region; // Store the regulatory region in CONFIG
+      
+      const defaults = getDefaultConsentByRegion(result.region);
       console.log("[SMCB] Defaults:", defaults);
       setConsent(defaults, "consent_default");
       injectBanner();
     } else {
-      const region = await fetchRegion();
-      CONFIG = getConfig(region);
-      CONFIG.region = region; // Store the region in CONFIG for later use
+      const result = await fetchRegion();
+      CONFIG = getConfig(result.countryCode);
+      CONFIG.region = result.region;
       console.log("[SMCB] Consent already stored. Banner will not show.");
     }
   }
