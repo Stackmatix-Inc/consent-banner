@@ -44,16 +44,30 @@
   function getConfig(region) {
     const userConfig = window.__ConsentBannerConfig || {};
     
+    // Check for region-specific configuration
+    const regionConfig = userConfig.regions?.[region] || {};
+    
+    // If this region has banner explicitly disabled, use an indicator
+    if (regionConfig.enabled === false) {
+      return { bannerDisabled: true };
+    }
+    
     // First try user config language
     // Then try region mapping
     // Then try HTML lang attribute
     // Finally fall back to browser language or 'en'
-    const fallbackLang = userConfig.language || 
+    const fallbackLang = regionConfig.language || 
+                         userConfig.language || 
                          REGION_TO_LANG[region] || 
                          document.documentElement.lang || 
                          (navigator.language?.slice(0, 2) || "en");
     
-    const config = Object.assign({}, DEFAULT_CONFIG, userConfig, { language: fallbackLang });
+    // Merge configs with prioritizing regionConfig over userConfig over DEFAULT_CONFIG
+    const config = Object.assign({}, DEFAULT_CONFIG, userConfig, regionConfig, { 
+      language: fallbackLang,
+      region: region // Expose the region in the config
+    });
+    
     console.log("[SMCB] Loaded config:", config);
     return config;
   }
@@ -1248,8 +1262,13 @@
     console.log("[SMCB] Region info:", result);
     
     // Always initialize CONFIG 
-    CONFIG = getConfig(result.countryCode);
-    CONFIG.region = result.region;
+    CONFIG = getConfig(result.region);
+    
+    // Check if banner is disabled for this region
+    if (CONFIG.bannerDisabled) {
+      console.log(`[SMCB] Banner disabled for region: ${result.region}`);
+      return; // Exit early, don't show banner
+    }
     
     if (!stored) {
       // No stored consent, get defaults for this region
