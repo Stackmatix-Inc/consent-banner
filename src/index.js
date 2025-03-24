@@ -70,7 +70,6 @@ require('./styles.css');
       region: region // Expose the region in the config
     });
     
-    console.log("[SMCB] Loaded config:", config);
     return config;
   }
 
@@ -495,13 +494,11 @@ require('./styles.css');
   async function fetchRegion() {
     // Try ipapi.co first
     try {
-      console.log("[SMCB] Attempting to fetch region from ipapi.co...");
       
       const res = await fetch("https://ipapi.co/json/")
       if (!res.ok) throw new Error(`ipapi.co responded with status: ${res.status}`);
       
       const data = await res.json();
-      console.log("[SMCB] Successfully used ipapi.co:", data.country_code);
       
       // Store original country code for language selection
       const countryCode = data.country_code;
@@ -534,7 +531,6 @@ require('./styles.css');
       return { region, countryCode };
     } catch (e) {
       console.log("[SMCB] Error with ipapi.co:", e.message);
-      console.log("[SMCB] Falling back to ipwho.is...");
       
       // Try ipwho.is as fallback
       try {
@@ -545,7 +541,6 @@ require('./styles.css');
           throw new Error("ipwho.is returned unsuccessful response");
         }
         
-        console.log("[SMCB] Successfully used ipwho.is:", data.country_code);
         
         // Store original country code for language selection
         const countryCode = data.country_code;
@@ -578,7 +573,6 @@ require('./styles.css');
         return { region, countryCode };
       } catch (e2) {
         console.log("[SMCB] Error with ipwho.is:", e2.message);
-        console.log("[SMCB] All geolocation attempts failed, using UNKNOWN");
         return { region: "UNKNOWN", countryCode: "US" }; // Default to US if all else fails
       }
     }
@@ -690,7 +684,6 @@ require('./styles.css');
           'ad_storage': adStorageValue
         });
         
-        console.log(`[SMCB] Updated Bing UET consent: ad_storage=${adStorageValue}`);
       } catch (e) {
         console.error("[SMCB] Error updating Bing UET consent:", e);
       }
@@ -1158,13 +1151,11 @@ require('./styles.css');
     const allowSelectionBtn = document.getElementById("cb-allow-selection");
     if (allowSelectionBtn) {
       allowSelectionBtn.onclick = () => {
-        console.log("Allow selection clicked"); // Add debug log
         
         // Hide main content and show preferences
         const mainContent = document.getElementById("cb-main-content");
         const preferences = document.getElementById("cb-preferences");
         
-        console.log("Elements found:", !!mainContent, !!preferences); // Debug
         
         if (mainContent) mainContent.style.display = "none";
         if (preferences) preferences.style.display = "block";
@@ -1287,26 +1278,22 @@ require('./styles.css');
   }
 
   async function onReady() {
-    console.log("[SMCB] onReady triggered");
     const stored = getStoredConsent();
     
     // Fetch region regardless of stored consent
     const result = await fetchRegion();
-    console.log("[SMCB] Region info:", result);
     
     // Always initialize CONFIG - pass both region and countryCode
     CONFIG = getConfig(result.region, result.countryCode);
     
     // Check if banner is disabled for this region
     if (CONFIG.bannerDisabled) {
-      console.log(`[SMCB] Banner disabled for region: ${result.region}`);
       return; // Exit early, don't show banner
     }
     
     if (!stored) {
       // No stored consent, get defaults for this region
       const defaults = getDefaultConsentByRegion(result.region);
-      console.log("[SMCB] Defaults:", defaults);
       
       // Set consent in storage/cookies
       setConsent(defaults, "consent_default");
@@ -1318,7 +1305,6 @@ require('./styles.css');
           window.uetq.push('consent', 'update', {
             'ad_storage': 'denied'
           });
-          console.log("[SMCB] Set initial Bing UET consent to denied based on region defaults");
         } catch (e) {
           console.error("[SMCB] Error setting initial Bing UET consent:", e);
         }
@@ -1333,11 +1319,8 @@ require('./styles.css');
         stored.functionality === false;
       
       if (hasOptedOut) {
-        console.log("[SMCB] User previously opted out of some consent categories. Showing banner again.");
         injectBanner();
-      } else {
-        console.log("[SMCB] All consent categories accepted. Banner will not show.");
-      }
+      } 
     }
   }
 
