@@ -591,6 +591,7 @@ require('./styles.css');
           functionality: false,
           tracking: false,
           targeting: false,
+          necessary: true,
           optOutEnabled: false
         };
       case "CPRA": // California
@@ -598,6 +599,7 @@ require('./styles.css');
           functionality: true,
           tracking: true,
           targeting: true,
+          necessary: true,
           optOutEnabled: true
         };
       case "US": // Other US states
@@ -605,6 +607,7 @@ require('./styles.css');
           functionality: true,
           tracking: true,
           targeting: true,
+          necessary: true,
           optOutEnabled: false
         };
       case "LGPD": // Brazil
@@ -612,6 +615,7 @@ require('./styles.css');
           functionality: false,
           tracking: false,
           targeting: false,
+          necessary: true,
           optOutEnabled: false
         };
       case "PIPEDA": // Canada
@@ -619,6 +623,7 @@ require('./styles.css');
           functionality: true,
           tracking: true,
           targeting: true,
+          necessary: true,
           optOutEnabled: true
         };
       case "APPI": // Japan
@@ -626,6 +631,7 @@ require('./styles.css');
           functionality: true,
           tracking: true,
           targeting: true,
+          necessary: true,
           optOutEnabled: true
         };
       case "PIPA": // Korea
@@ -633,6 +639,7 @@ require('./styles.css');
           functionality: false,
           tracking: false,
           targeting: false,
+          necessary: true,
           optOutEnabled: false
         };
       case "ROW": // Rest of World
@@ -640,6 +647,7 @@ require('./styles.css');
           functionality: false,
           tracking: false,
           targeting: false,
+          necessary: true,
           optOutEnabled: false
         };
       case "UNKNOWN":
@@ -648,6 +656,7 @@ require('./styles.css');
           functionality: false,
           tracking: false,
           targeting: false,
+          necessary: true,
           optOutEnabled: true
         };
     }
