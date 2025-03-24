@@ -602,7 +602,7 @@ require('./styles.css');
           necessary: true,
           optOutEnabled: true
         };
-      case "US": // Other US states
+      case "US":// Other US states
         return {
           functionality: true,
           tracking: true,
@@ -1050,6 +1050,7 @@ require('./styles.css');
             functionality: true, 
             tracking: true, 
             targeting: true,
+            necessary: true,
             optOutEnabled: getStoredConsent()?.optOutEnabled || false 
           }, "consent_updated");
           
@@ -1080,6 +1081,7 @@ require('./styles.css');
             functionality: true, 
             tracking: true, 
             targeting: true,
+            necessary: true,
             optOutEnabled: getStoredConsent()?.optOutEnabled || false 
           }, "consent_updated");
           
@@ -1130,6 +1132,7 @@ require('./styles.css');
             functionality: false, 
             tracking: false, 
             targeting: false,
+            necessary: true,
             optOutEnabled: getStoredConsent()?.optOutEnabled || false 
           }, "consent_updated");
           
@@ -1198,6 +1201,7 @@ require('./styles.css');
             functionality: document.getElementById("cb-func").checked,
             tracking: document.getElementById("cb-track").checked,
             targeting: document.getElementById("cb-target").checked,
+            necessary: true,
             optOutEnabled: getStoredConsent()?.optOutEnabled || false
           };
           setConsent(consents, "consent_updated");
@@ -1230,7 +1234,8 @@ require('./styles.css');
           const updatedConsent = {
             ...storedConsent,
             tracking: false,
-            targeting: false
+            targeting: false,
+            necessary: true
           };
           
           setConsent(updatedConsent, "consent_updated");
