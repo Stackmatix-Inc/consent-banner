@@ -43,7 +43,7 @@ require('./styles.css');
     bingUET: true // Default to true - enables Bing UET consent management
   };
 
-  function getConfig(region) {
+  function getConfig(region, countryCode) {
     const userConfig = window.__ConsentBannerConfig || {};
     
     // Check for region-specific configuration
@@ -55,12 +55,12 @@ require('./styles.css');
     }
     
     // First try user config language
-    // Then try region mapping
+    // Then try country code mapping to language
     // Then try HTML lang attribute
     // Finally fall back to browser language or 'en'
     const fallbackLang = regionConfig.language || 
                          userConfig.language || 
-                         REGION_TO_LANG[countryCode] || 
+                         REGION_TO_LANG[countryCode] || // Use countryCode instead of region
                          document.documentElement.lang || 
                          (navigator.language?.slice(0, 2) || "en");
     
@@ -547,33 +547,39 @@ require('./styles.css');
         
         console.log("[SMCB] Successfully used ipwho.is:", data.country_code);
         
+        // Store original country code for language selection
+        const countryCode = data.country_code;
+        
         // GDPR countries (EU member states + UK, Switzerland, Norway, Iceland, Liechtenstein)
         const gdprCountries = ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","GB","UK","CH"];
         
-        if (gdprCountries.includes(data.country_code)) {
-          return "GDPR";
-        }
-        
-        // US with special case for California
-        if (data.country_code === "US") {
+        let region;
+        if (gdprCountries.includes(countryCode)) {
+          region = "GDPR";
+        } else if (countryCode === "US") {
           if (data.region_code === "CA") {
-            return "CPRA";
+            region = "CPRA";
+          } else {
+            region = "US";
           }
-          return "US";
+        } else if (countryCode === "BR") {
+          region = "LGPD";
+        } else if (countryCode === "CA") {
+          region = "PIPEDA";
+        } else if (countryCode === "JP") {
+          region = "APPI";
+        } else if (countryCode === "KR") {
+          region = "PIPA";
+        } else {
+          region = "ROW";
         }
         
-        // Other specific privacy regulation regions
-        if (data.country_code === "BR") return "LGPD";
-        if (data.country_code === "CA") return "PIPEDA";
-        if (data.country_code === "JP") return "APPI";
-        if (data.country_code === "KR") return "PIPA";
-        
-        // Default to Rest of World
-        return "ROW";
+        // Return both the regulatory region and the country code
+        return { region, countryCode };
       } catch (e2) {
         console.log("[SMCB] Error with ipwho.is:", e2.message);
         console.log("[SMCB] All geolocation attempts failed, using UNKNOWN");
-        return "UNKNOWN";
+        return { region: "UNKNOWN", countryCode: "US" }; // Default to US if all else fails
       }
     }
   }
@@ -1274,8 +1280,8 @@ require('./styles.css');
     const result = await fetchRegion();
     console.log("[SMCB] Region info:", result);
     
-    // Always initialize CONFIG 
-    CONFIG = getConfig(result.region);
+    // Always initialize CONFIG - pass both region and countryCode
+    CONFIG = getConfig(result.region, result.countryCode);
     
     // Check if banner is disabled for this region
     if (CONFIG.bannerDisabled) {
