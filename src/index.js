@@ -37,7 +37,8 @@
     layout: "footer", // Options: "footer", "header", "inline", "modal", "interstitial"
     configurability: "full", // Options: "none", "some", "full"
     privacyPolicyUrl: "/privacy-policy",
-    language: "en"
+    language: "en",
+    bingUET: true // Default to true - enables Bing UET consent management
   };
 
   function getConfig(region) {
@@ -632,6 +633,26 @@
     localStorage.setItem(CONSENT_COOKIE_KEY, JSON.stringify(consents));
     document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=31536000`;
     DATA_LAYER.push({ event: eventName });
+    
+    // Handle Bing UET consent update if enabled in config
+    if (CONFIG.bingUET) {
+      try {
+        // Initialize Bing UET queue if not already available
+        window.uetq = window.uetq || [];
+        
+        // Map targeting consent to ad_storage value (granted/denied)
+        const adStorageValue = consents.targeting ? 'granted' : 'denied';
+        
+        // Push consent update to Bing UET
+        window.uetq.push('consent', 'update', {
+          'ad_storage': adStorageValue
+        });
+        
+        console.log(`[SMCB] Updated Bing UET consent: ad_storage=${adStorageValue}`);
+      } catch (e) {
+        console.error("[SMCB] Error updating Bing UET consent:", e);
+      }
+    }
   }
 
   function getOptOutText(region) {
@@ -1216,23 +1237,34 @@
   async function onReady() {
     console.log("[SMCB] onReady triggered");
     const stored = getStoredConsent();
+    
+    // Fetch region regardless of stored consent
+    const result = await fetchRegion();
+    console.log("[SMCB] Region info:", result);
+    
+    // Always initialize CONFIG 
+    CONFIG = getConfig(result.countryCode);
+    CONFIG.region = result.region;
+    
     if (!stored) {
-      const result = await fetchRegion();
-      console.log("[SMCB] Region info:", result);
-      
-      // Use countryCode for language selection but region for regulatory defaults
-      CONFIG = getConfig(result.countryCode);
-      CONFIG.region = result.region; // Store the regulatory region in CONFIG
-      
+      // No stored consent, show banner with defaults
       const defaults = getDefaultConsentByRegion(result.region);
       console.log("[SMCB] Defaults:", defaults);
       setConsent(defaults, "consent_default");
       injectBanner();
     } else {
-      const result = await fetchRegion();
-      CONFIG = getConfig(result.countryCode);
-      CONFIG.region = result.region;
-      console.log("[SMCB] Consent already stored. Banner will not show.");
+      // Check if any consent categories are false (opted out)
+      const hasOptedOut = 
+        stored.tracking === false || 
+        stored.targeting === false || 
+        stored.functionality === false;
+      
+      if (hasOptedOut) {
+        console.log("[SMCB] User previously opted out of some consent categories. Showing banner again.");
+        injectBanner();
+      } else {
+        console.log("[SMCB] All consent categories accepted. Banner will not show.");
+      }
     }
   }
 
