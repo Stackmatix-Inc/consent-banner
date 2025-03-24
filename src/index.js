@@ -1,4 +1,6 @@
-// src/index.js
+// Import CSS at the top level - webpack will handle this
+require('./styles.css');
+
 (function () {
   const REGION_TO_LANG = {
     US: "en", GB: "en", AU: "en", CA: "en", IE: "en",
@@ -100,6 +102,8 @@
       readMore: "Read More",
       allowSelection: "Allow Selection",
       moreDetails: "More Details",
+      details: "Show details",
+      back: "Back",
       strictlyNecessaryInfo: "These cookies are essential for the website to function properly and cannot be disabled.",
       functionalityInfo: "These cookies enable personalized features and functionality.",
       trackingInfo: "These cookies collect information about how you use our website to help us improve it.",
@@ -139,6 +143,8 @@
       readMore: "Lire plus",
       allowSelection: "Autoriser la sélection",
       moreDetails: "Plus de détails",
+      details: "Afficher les détails",
+      back: "Retour",
       strictlyNecessaryInfo: "Ces cookies sont essentiels au bon fonctionnement du site et ne peuvent pas être désactivés.",
       functionalityInfo: "Ces cookies permettent des fonctionnalités et des caractéristiques personnalisées.",
       trackingInfo: "Ces cookies collectent des informations sur la façon dont vous utilisez notre site pour nous aider à l'améliorer.",
@@ -170,7 +176,14 @@
       targeting: "Marketing- und Targeting-Cookies",
       save: "Einstellungen speichern",
       optOut: "Do Not Sell My Information",
-      optOutConfirm: "You have opted out of the sale of your personal information."
+      optOutConfirm: "You have opted out of the sale of your personal information.",
+      details: "Details anzeigen",
+      back: "Zurück",
+      strictlyNecessaryInfo: "These cookies are essential for the website to function properly and cannot be disabled.",
+      functionalityInfo: "These cookies enable personalized features and functionality.",
+      trackingInfo: "These cookies collect information about how you use our website to help us improve it.",
+      targetingInfo: "These cookies are used to deliver relevant advertisements and marketing campaigns.",
+      allowAll: "ALLOW ALL",
     },
     es: {
       description: "🍪 Este sitio web utiliza cookies para mejorar su experiencia de navegación y ofrecer servicios personalizados.",

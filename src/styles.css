@@ -410,10 +410,6 @@ body.has-header-notice {
   border-top-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Add language entry for 'details' */
-I18N.en.details = "Show details";
-// Add for other languages as well
-
 /* Ensure back button has proper styling */
 #cb-back {
   background: #757575;
@@ -424,34 +420,13 @@ I18N.en.details = "Show details";
   background: #616161;
 }
 
-/* Add "Back" translation to all languages */
+/* Add proper styling for preference actions */
 .preferences-actions {
   margin-top: 15px;
   display: flex;
-  justify-content: space-between;
 }
 
-/* Translation for new back button */
-I18N.en.back = "Back";
-I18N.fr.back = "Retour";
-I18N.de.back = "Zurück";
-// Add this for all supported languages
-
-/* Accessibility button (future) */
-#cookie-settings-button {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background: #2196F3;
-  color: white;
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 999998;
-  display: none;
-}
-
+/* Special media queries for mobile devices */
 @media (max-width: 480px) {
   .cb-wrapper {
     bottom: 10px;

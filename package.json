@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/index.js --bundle --minify --outfile=dist/consent-banner.min.js && cp src/styles.css dist/consent-banner.min.css",
+    "build": "webpack --config webpack.config.js",
+    "dev": "webpack --config webpack.config.js --mode=development --watch",
     "prepare": "husky"
   },
   "keywords": [],
@@ -15,11 +16,18 @@
     "esbuild": "^0.25.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@commitlint/cz-commitlint": "^19.5.0",
+    "babel-loader": "^10.0.0",
+    "css-loader": "^7.1.2",
     "husky": "^9.1.7",
-    "typescript": "^5.8.2"
+    "style-loader": "^4.0.0",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
   },
   "config": {
     "commitizen": {
