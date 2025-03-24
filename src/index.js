@@ -1166,15 +1166,18 @@
     const stored = getStoredConsent();
     if (!stored) {
       const region = await fetchRegion();
+      console.log("[SMCB] Region:", region);
       CONFIG = getConfig(region);
       CONFIG.region = region; // Store the region in CONFIG for later use
       const defaults = getDefaultConsentByRegion(region);
+      console.log("[SMCB] Defaults:", defaults);
       setConsent(defaults, "consent_default");
       injectBanner();
     } else {
       const region = await fetchRegion();
       CONFIG = getConfig(region);
       CONFIG.region = region; // Store the region in CONFIG for later use
+      console.log("[SMCB] Consent already stored. Banner will not show.");
     }
   }
 
