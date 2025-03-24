@@ -666,8 +666,11 @@ require('./styles.css');
   }
 
   function setConsent(consents, eventName) {
+    // Remove the userHasConsented flag since we won't be using it anymore
+    
     localStorage.setItem(CONSENT_COOKIE_KEY, JSON.stringify(consents));
-    document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=31536000`;
+    // Change cookie max-age from 2592000 (30 days) to 15552000 (180 days)
+    document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=15552000`;
     DATA_LAYER.push({ event: eventName });
     
     // Set a temporary flag to prevent the banner from immediately reappearing
@@ -1333,15 +1336,9 @@ require('./styles.css');
       
       injectBanner();
     } else {
-      // Check if any consent categories are false (opted out)
-      const hasOptedOut = 
-        stored.tracking === false || 
-        stored.targeting === false || 
-        stored.functionality === false;
-      
-      if (hasOptedOut) {
-        injectBanner();
-      } 
+      // User has consent values already set, don't show the banner again
+      // regardless of what those values are
+      return;
     }
   }
 
