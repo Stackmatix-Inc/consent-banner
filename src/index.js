@@ -465,37 +465,71 @@
   }
 
   async function fetchRegion() {
-    try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      
-      // GDPR countries (EU member states + UK, Switzerland, Norway, Iceland, Liechtenstein)
-      const gdprCountries = ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","GB","UK","CH"];
-      
-      if (gdprCountries.includes(data.country_code)) {
-        return "GDPR";
+    return new Promise((resolve) => {
+      try {
+        // Create a unique callback function name
+        const callbackName = 'smcb_ipapi_callback_' + Math.floor(Math.random() * 10000000);
+        
+        // Define the callback function in global scope
+        window[callbackName] = function(data) {
+          // Clean up
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete window[callbackName];
+          
+          // Process region data
+          let region = "UNKNOWN";
+          const gdprCountries = ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","GB","UK","CH"];
+          
+          if (gdprCountries.includes(data.country_code)) {
+            region = "GDPR";
+          } else if (data.country_code === "US") {
+            region = data.region_code === "CA" ? "CPRA" : "US";
+          } else if (data.country_code === "BR") {
+            region = "LGPD";
+          } else if (data.country_code === "CA") {
+            region = "PIPEDA";
+          } else if (data.country_code === "JP") {
+            region = "APPI";
+          } else if (data.country_code === "KR") {
+            region = "PIPA";
+          } else {
+            region = "ROW";
+          }
+          
+          console.log("[SMCB] Detected region:", region);
+          resolve(region);
+        };
+        
+        // Create script element for JSONP
+        const script = document.createElement('script');
+        script.src = `https://ipapi.co/jsonp/?callback=${callbackName}`;
+        
+        // Handle errors and timeout
+        script.onerror = function() {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete window[callbackName];
+          console.log("[SMCB] Error fetching region, falling back to GDPR");
+          resolve("GDPR");
+        };
+        
+        // Set timeout (5 seconds)
+        const timeoutId = setTimeout(function() {
+          if (window[callbackName]) {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            console.log("[SMCB] Region fetch timed out, falling back to GDPR");
+            resolve("GDPR");
+          }
+        }, 5000);
+        
+        // Append script to start request
+        document.head.appendChild(script);
+        
+      } catch (e) {
+        console.log("[SMCB] Exception in region detection:", e);
+        resolve("GDPR"); // Safety fallback
       }
-      
-      // US with special case for California
-      if (data.country_code === "US") {
-        if (data.region_code === "CA") {
-          return "CPRA";
-        }
-        return "US";
-      }
-      
-      // Other specific privacy regulation regions
-      if (data.country_code === "BR") return "LGPD";
-      if (data.country_code === "CA") return "PIPEDA";
-      if (data.country_code === "JP") return "APPI";
-      if (data.country_code === "KR") return "PIPA";
-      
-      // Default to Rest of World
-      return "ROW";
-    } catch (e) {
-      console.log("[SMCB] Error fetching region:", e);
-      return "UNKNOWN";
-    }
+    });
   }
 
   function getDefaultConsentByRegion(region) {
