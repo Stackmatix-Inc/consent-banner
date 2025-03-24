@@ -666,10 +666,14 @@ require('./styles.css');
   }
 
   function setConsent(consents, eventName) {
-    // Remove the userHasConsented flag since we won't be using it anymore
+    // Add explicitConsentSet flag when the event is consent_updated
+    // This indicates user has made an explicit choice
+    if (eventName === "consent_updated") {
+      consents.explicitConsentSet = true;
+    }
     
     localStorage.setItem(CONSENT_COOKIE_KEY, JSON.stringify(consents));
-    // Change cookie max-age from 2592000 (30 days) to 15552000 (180 days)
+    // Set cookie with 180 days expiration
     document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=15552000`;
     DATA_LAYER.push({ event: eventName });
     
@@ -1111,9 +1115,24 @@ require('./styles.css');
       okBtn.onclick = () => {
         const bannerElement = document.getElementById("consent-banner");
         animateHideBanner(bannerElement, () => {
-          // Keep existing consent levels, just dismiss the banner
-          document.getElementById("consent-banner").remove();
+          // Changed from just dismissing to explicitly setting consent
+          const storedConsent = getStoredConsent() || {};
+          // Maintain existing consent values but update as an explicit choice
+          setConsent({
+            ...storedConsent,
+            functionality: storedConsent.functionality !== undefined ? storedConsent.functionality : true,
+            tracking: storedConsent.tracking !== undefined ? storedConsent.tracking : true,
+            targeting: storedConsent.targeting !== undefined ? storedConsent.targeting : true,
+            necessary: true,
+            optOutEnabled: storedConsent.optOutEnabled || false
+          }, "consent_updated");
           
+          // Remove the banner element
+          if (bannerElement && bannerElement.parentNode) {
+            bannerElement.parentNode.removeChild(bannerElement);
+          }
+          
+          // Remove overlay if exists
           const overlay = document.querySelector(".cb-overlay");
           if (overlay) overlay.remove();
           
@@ -1315,30 +1334,33 @@ require('./styles.css');
       }
     }
     
-    if (!stored) {
-      // No stored consent, get defaults for this region
-      const defaults = getDefaultConsentByRegion(result.region);
-      
-      // Set consent in storage/cookies
-      setConsent(defaults, "consent_default");
-      
-      // Additional UET update for targeting=false regions (before banner shows)
-      if (CONFIG.bingUET && defaults.targeting === false) {
-        try {
-          window.uetq = window.uetq || [];
-          window.uetq.push('consent', 'update', {
-            'ad_storage': 'denied'
-          });
-        } catch (e) {
-          console.error("[SMCB] Error setting initial Bing UET consent:", e);
+    // Show banner if:
+    // 1. No consent is stored at all, OR
+    // 2. Consent exists but explicitConsentSet flag is not present/true
+    if (!stored || !stored.explicitConsentSet) {
+      // If no consent at all, set defaults but show banner
+      if (!stored) {
+        // Get defaults for this region
+        const defaults = getDefaultConsentByRegion(result.region);
+        
+        // Set consent in storage/cookies - explicitly NOT setting explicitConsentSet flag
+        setConsent(defaults, "consent_default");
+        
+        // Additional UET update for targeting=false regions (before banner shows)
+        if (CONFIG.bingUET && defaults.targeting === false) {
+          try {
+            window.uetq = window.uetq || [];
+            window.uetq.push('consent', 'update', {
+              'ad_storage': 'denied'
+            });
+          } catch (e) {
+            console.error("[SMCB] Error setting initial Bing UET consent:", e);
+          }
         }
       }
       
+      // Always inject the banner if no explicit consent was given
       injectBanner();
-    } else {
-      // User has consent values already set, don't show the banner again
-      // regardless of what those values are
-      return;
     }
   }
 
