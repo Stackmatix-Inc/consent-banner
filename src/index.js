@@ -659,7 +659,24 @@ require('./styles.css');
   function setConsent(consents, eventName) {
     localStorage.setItem(CONSENT_COOKIE_KEY, JSON.stringify(consents));
     document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=31536000`;
+    
+    // Push the standard consent event
     DATA_LAYER.push({ event: eventName });
+    
+    // If this is the default consent event, also push a specialized event
+    if (eventName === "consent_default") {
+      DATA_LAYER.push({ 
+        event: "set_default_consents",
+        region: CONFIG?.region || "UNKNOWN",
+        default_consents: {
+          functionality: consents.functionality,
+          tracking: consents.tracking,
+          targeting: consents.targeting,
+          optOutEnabled: consents.optOutEnabled
+        }
+      });
+      console.log("[SMCB] Default consents set and pushed to dataLayer:", consents);
+    }
     
     // Handle Bing UET consent update if enabled in config
     if (CONFIG.bingUET) {
