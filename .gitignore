@@ -1,4 +1,11 @@
 *.code-workspace
 .husky/
 node_modules/
-
+scripts/
+scripts/*
+node_modules/*
+commitlint.config.js
+package-lock.json
+test/
+test/*
+test/notes.md
