@@ -670,6 +670,12 @@ require('./styles.css');
     document.cookie = `${CONSENT_COOKIE_KEY}=${JSON.stringify(consents)}; path=/; max-age=31536000`;
     DATA_LAYER.push({ event: eventName });
     
+    // Set a temporary flag to prevent the banner from immediately reappearing
+    // This is especially important when user opted out of some categories
+    if (eventName === "consent_updated") {
+      sessionStorage.setItem('recent_consent_choice', Date.now().toString());
+    }
+    
     // Handle Bing UET consent update if enabled in config
     if (CONFIG.bingUET) {
       try {
@@ -1289,6 +1295,21 @@ require('./styles.css');
     // Check if banner is disabled for this region
     if (CONFIG.bannerDisabled) {
       return; // Exit early, don't show banner
+    }
+    
+    // Check for a temporary flag that indicates user just made a choice
+    // This prevents the banner from immediately reappearing after a user
+    // deliberately opted out of some categories
+    const recentUserChoice = sessionStorage.getItem('recent_consent_choice');
+    if (recentUserChoice) {
+      const timeSinceChoice = Date.now() - parseInt(recentUserChoice, 10);
+      // If choice was made in the last 2 seconds, don't show the banner again
+      if (timeSinceChoice < 2000) {
+        return;
+      } else {
+        // Clear the flag after the grace period
+        sessionStorage.removeItem('recent_consent_choice');
+      }
     }
     
     if (!stored) {
