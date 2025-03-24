@@ -865,10 +865,15 @@
       animateShowBanner(banner);
     }
     
-    // Pre-check boxes based on default consent for full configurability
+    // Pre-set toggles based on stored consent values or defaults for full configurability
     if (CONFIG.configurability === "full") {
       try {
+        // Get stored consent or use defaults as fallback
+        const storedConsent = getStoredConsent();
         const defaults = getDefaultConsentByRegion(region);
+        
+        // Use stored values if available, otherwise use defaults
+        const consentValues = storedConsent || defaults;
         
         // Set checkbox states
         const funcCheckbox = document.getElementById("cb-func");
@@ -876,21 +881,21 @@
         const targetCheckbox = document.getElementById("cb-target");
         
         if (funcCheckbox) {
-          funcCheckbox.checked = defaults.functionality;
-          document.getElementById("func-status").textContent = defaults.functionality ? t("on") : t("off");
+          funcCheckbox.checked = consentValues.functionality;
+          document.getElementById("func-status").textContent = consentValues.functionality ? t("on") : t("off");
         }
         
         if (trackCheckbox) {
-          trackCheckbox.checked = defaults.tracking;
-          document.getElementById("track-status").textContent = defaults.tracking ? t("on") : t("off");
+          trackCheckbox.checked = consentValues.tracking;
+          document.getElementById("track-status").textContent = consentValues.tracking ? t("on") : t("off");
         }
         
         if (targetCheckbox) {
-          targetCheckbox.checked = defaults.targeting;
-          document.getElementById("target-status").textContent = defaults.targeting ? t("on") : t("off");
+          targetCheckbox.checked = consentValues.targeting;
+          document.getElementById("target-status").textContent = consentValues.targeting ? t("on") : t("off");
         }
       } catch (e) {
-        console.error("Error setting toggle values:", e);
+        console.error("[SMCB] Error setting toggle values:", e);
       }
     }
     
