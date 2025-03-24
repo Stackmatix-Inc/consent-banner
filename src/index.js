@@ -60,7 +60,7 @@ require('./styles.css');
     // Finally fall back to browser language or 'en'
     const fallbackLang = regionConfig.language || 
                          userConfig.language || 
-                         REGION_TO_LANG[region] || 
+                         REGION_TO_LANG[countryCode] || 
                          document.documentElement.lang || 
                          (navigator.language?.slice(0, 2) || "en");
     
